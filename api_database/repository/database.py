@@ -15,3 +15,5 @@ def criar_db():
         print(f'Ocorreu erro na conexao com o Banco de Dados: {ex}')
 
     return mydb
+
+

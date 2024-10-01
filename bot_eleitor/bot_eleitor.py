@@ -1,15 +1,18 @@
-
 from botcity.web import WebBot, Browser, By
 from botcity.maestro import *
 from webdriver_manager.chrome import ChromeDriverManager
 from botcity.plugins.http import BotHttpPlugin
 from PyPDF2 import PdfReader, PdfWriter
 from pdf.pdf import merge_pdfs
+from e_mail import e_mail
+
 import requests
 from planilha.planilha import ler_excel
 from datetime import datetime
 
-
+def api_lista_usuarios():
+    http=BotHttpPlugin('http://127.0.0.1:5000/usuario')
+    return http.get_as_json()
 
 def extrair_dados(bot):
     dados = {}
@@ -116,10 +119,13 @@ def acessar_site(bot, arq_excel):
 
         # Preenche os dados do eleitor
         bot.find_element('//*[@id="modal"]/div/div/div[2]/div[2]/form/div[1]/div[1]/input', By.XPATH).send_keys(eleitor)
+        bot.wait(1000)
         bot.find_element('//*[@id="modal"]/div/div/div[2]/div[2]/form/div[1]/div[3]/div/input', By.XPATH).send_keys(mae)
+        bot.wait(1000)
         bot.find_element('//*[@id="modal"]/div/div/div[2]/div[2]/form/div[1]/div[2]/input', By.XPATH).send_keys(nascimento)
         bot.wait(1000)
-        bot.find_element('//*[@id="modal"]/div/div/div[2]/div[2]/form/div[2]/button[2]', By.XPATH).click()
+        bot.enter()
+        # bot.find_element('//*[@id="modal"]/div/div/div[2]/div[2]/form/div[2]/button[2]', By.XPATH).click()
         bot.wait(1000)
 
         # função - Extrai dados da página
@@ -129,7 +135,7 @@ def acessar_site(bot, arq_excel):
         imprimir_dados_extraidos(eleitor, mae, nascimento, cpf, dados_extraidos)
 
         # Salva o PDF com o nome completo
-        nome_arq_pdf = f'{cpf}_{dados_extraidos["nro_titulo"]}.pdf'  # Adicione a extensão .pdf aqui
+        nome_arq_pdf = f'{cpf}_{eleitor}.pdf'  # Adicione a extensão .pdf aqui
         caminho_pdf = fr'C:\Users\matutino\Desktop\avaliacao-botcity\bot_eleitor\pdf\{nome_arq_pdf}'
         bot.print_pdf(caminho_pdf)
 
@@ -179,6 +185,17 @@ def main():
     bot.maximize_window()
     arq_excel = r'C:\Users\matutino\Desktop\avaliacao-botcity\bot_eleitor\planilha\RelacaoEleitor.xlsx'
     acessar_site(bot, arq_excel)
+
+    print('Enviando E-mail para a lista de usuario com arquivo Produtos.pdf em anexo.')
+    arq_anexo = r'C:\Users\matutino\Desktop\avaliacao-botcity\bot_eleitor\pdf\merged_output.pdf'
+    retornoJSON_usuarios = api_lista_usuarios()
+    lista_produto = retornoJSON_usuarios['dados']
+    for usuario in lista_produto:
+        destinatario = usuario['email']
+        print(f'Enviando e-mail para: {destinatario}')
+        assunto = "Lista de Produtos"
+        conteudo = "<h1>Sistema Automatizado!</h1> Em anexo, a lista de produtos."
+        e_mail.enviar_email_anexo(destinatario, assunto, conteudo,arq_anexo)    
 
     print('Fim do processamento...')
     bot.stop_browser()
