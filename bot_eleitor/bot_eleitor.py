@@ -191,7 +191,7 @@ def main():
     retornoJSON_usuarios = api_lista_usuarios()
     lista_produto = retornoJSON_usuarios['dados']
     for usuario in lista_produto:
-        destinatario = usuario['email']
+        cara = usuario['email']
         print(f'Enviando e-mail para: {destinatario}')
         assunto = "Lista de Produtos"
         conteudo = "<h1>Sistema Automatizado!</h1> Em anexo, a lista de produtos."
@@ -207,5 +207,3 @@ def not_found(label):
 
 if __name__ == '__main__':
     main()
-
-    # só testando o pull request
