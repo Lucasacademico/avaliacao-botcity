@@ -191,7 +191,7 @@ def main():
     retornoJSON_usuarios = api_lista_usuarios()
     lista_produto = retornoJSON_usuarios['dados']
     for usuario in lista_produto:
-        cara = usuario['email']
+        destinatario = usuario['email']
         print(f'Enviando e-mail para: {destinatario}')
         assunto = "Lista de Produtos"
         conteudo = "<h1>Sistema Automatizado!</h1> Em anexo, a lista de produtos."
